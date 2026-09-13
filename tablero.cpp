@@ -75,6 +75,25 @@ void mostrarTablero(unsigned char* datos, int filas, int columnas){
     }
 }
 
+// 2.5b (visualización en binario, requisito explícito del enunciado)
+void mostrarTableroBinario(unsigned char* datos, int filas, int columnas){
+    for(int i = 0; i < filas; i++){
+        for(int j = 0; j < columnas; j++){
+            unsigned char ficha = obtenerFicha(datos, calcularIndice(i, j, columnas)); // mismo acceso que mostrarTablero
+            cout << "|";
+            for(int bit = 2; bit >= 0; bit--){ // cada ficha son 3 bits: bit2 bit1 bit0
+                if ((ficha & (1 << bit))){
+                    cout<<"1";
+                }
+                else{
+                    cout<<"0";
+                } // cierra el else
+                } // cierra el for(bit)
+        } // cierra el for(j)
+        cout << "|" << endl; // salto de línea al terminar la fila
+    }
+}
+
 // 2.6
 void agregarFila(unsigned char*& datos, int& filas, int columnas, int posicion, int& bytesReservadosActuales){
     int filasViejas = filas;
@@ -106,7 +125,7 @@ void agregarFila(unsigned char*& datos, int& filas, int columnas, int posicion, 
     int c = 0;
     while (c < columnas) {
         int indice = calcularIndice(posicion, c, columnas);
-        establecerFicha(datos, indice, 1); // llena la fila nueva con ficha por defecto
+        establecerFicha(datos, indice, 0); // llena la fila nueva con ficha por defecto
         c++;
     }
 }

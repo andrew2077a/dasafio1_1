@@ -1,18 +1,18 @@
 #include "bits.h"
 
-int calcularBytesNecesarios(const int posiciones){
+int calcularBytesNecesarios(int posiciones){
     return ((posiciones*3)+7)/8; // bits totales /8, redondeado hacia arriba
 }
 
-int calcularDesplazamientoBit(const int indicePosicion){
+int calcularDesplazamientoBit(int indicePosicion){
     return (indicePosicion*3); // cada ficha ocupa 3 bits
 }
 
-int calcularIndice(const int fila,const int columna,const int columnas ){
+int calcularIndice(int fila, int columna, int columnas){
     return((fila*columnas) + columna); // (fila,columna) -> índice 1D
 }
 
-unsigned char obtenerFicha(unsigned char* datos, const int indicePosicion) {
+unsigned char obtenerFicha(unsigned char* datos, int indicePosicion) {
     int despla, posibtye, posicionDentroBtye;
     unsigned char ficha;
     unsigned char parte1, parte2;
@@ -39,7 +39,7 @@ unsigned char obtenerFicha(unsigned char* datos, const int indicePosicion) {
     return ficha;
 }
 
-void establecerFicha(unsigned char* datos, const int indicePosicion, const unsigned char valor){
+void establecerFicha(unsigned char* datos, int indicePosicion, unsigned char valor){
     int despla, posibtye, posicionDentroBtye;
 
     despla = calcularDesplazamientoBit(indicePosicion);
