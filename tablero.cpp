@@ -89,26 +89,25 @@ void eliminarColumna(unsigned char*& datos, int filas, int& columnas, int posici
             if (c == posicion) {
                 c++;
                 continue;
+             }
 
-            int columnaNueva;
-            if (c < posicion) {
+             int columnaNueva;
+             if (c < posicion) {
                 columnaNueva = c;
-            }
-            else
-            {
+             }
+             else{
                 columnaNueva = c - 1;
-            }
-            int indiceViejo = calcularIndice(f, c, columnasViejas);
-            unsigned char ficha = obtenerFicha(datos, indiceViejo);
+             }
+             int indiceViejo = calcularIndice(f, c, columnasViejas);
+             unsigned char ficha = obtenerFicha(datos, indiceViejo);
 
-            int indiceNuevo = calcularIndice(f, columnaNueva, columnasNuevas);
-            establecerFicha(datos, indiceNuevo, ficha);
-            c++;
+             int indiceNuevo = calcularIndice(f, columnaNueva, columnasNuevas);
+             establecerFicha(datos, indiceNuevo, ficha);
+             c++;
         }
          f++;
 
     }
-}
      columnas = columnasNuevas;
      int porcentajeUso = calcularPorcentajeUso(filas,columnas, bytesReservadosActuales);
      if (porcentajeUso< 65 ){
