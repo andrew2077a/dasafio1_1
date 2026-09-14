@@ -61,13 +61,12 @@ void mostrarTablero(unsigned char* datos, int filas, int columnas){
             cout << "|";
             ficha = obtenerFicha(datos, calcularIndice(i, j, columnas));
             switch (ficha) { // cada valor de ficha -> un carácter decorativo
-            case 0b00000001: cout << (char)254; break;
-            case 0b00000011: cout << (char)205; break;
-            case 0b00000111: cout << (char)206; break;
-            case 0b00000101: cout << (char)36;  break;
-            case 0b00000110: cout << (char)35;  break;
-            case 0b00000100: cout << (char)64;  break;
-            default: break;
+            case 0b00000001: cout << (char)254; break; // 1
+            case 0b00000010: cout << (char)205; break; // 2
+            case 0b00000011: cout << (char)64;  break; // 3
+            case 0b00000100: cout << (char)36;  break; // 4
+            case 0b00000101: cout << (char)35;  break; // 5
+            case 0b00000110: cout << (char)206; break; // 6
             }
             cout << "|";
         }
