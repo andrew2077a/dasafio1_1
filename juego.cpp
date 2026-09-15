@@ -127,28 +127,35 @@ void generarFichasIniciales(unsigned char* datos, int filas, int columnas){
 
 // 3.8
 int resolverCombinaciones(unsigned char* datos, int filas, int columnas, int& combosDetectados){
+    // ---- CAMBIO EMPIEZA AQUI ----
+    static unsigned char* marcas = nullptr;
+    static int capacidadActual = 0;
     int posiciones = filas * columnas;
-    unsigned char* marcas = new unsigned char[posiciones]; // CAMBIO: se quitó capacidadActual y el if, ya no tenían proposito sin static
-    for (int i = 0; i < posiciones; i++) marcas[i] = 0; // igual hay que limpiarlo cada vez
+
+    if (posiciones > capacidadActual) {
+        delete[] marcas;
+        marcas = new unsigned char[posiciones];
+        capacidadActual = posiciones;
+    }
+    // ---- CAMBIO TERMINA AQUI ----
+    for (int i = 0; i < posiciones; i++) marcas[i] = 0;
 
     int fichasBorradas = 0;
     int combosH = detectarCombinacionesHorizontales(datos, filas, columnas, marcas);
     int combosV = detectarCombinacionesVerticales(datos, filas, columnas, marcas);
-    combosDetectados = combosH + combosV; // NUEVO: ya no se descarta
+    combosDetectados = combosH + combosV;
 
     for (int f = 0; f < filas; f++) {
         for (int c = 0; c < columnas; c++) {
             int indice = calcularIndice(f, c, columnas);
             if (marcas[indice] == 1) {
-                establecerFicha(datos, indice, 0); // vacía las marcadas
+                establecerFicha(datos, indice, 0);
                 fichasBorradas++;
             }
         }
     }
-    delete[] marcas; // se libera aquí mismo, ya no hay fuga
     return fichasBorradas;
 }
-
 // 3.9
 void reorganizarTablero(unsigned char* datos, int filas, int columnas){
     for(int j=0;j<columnas;j++){
@@ -173,20 +180,21 @@ void reorganizarTablero(unsigned char* datos, int filas, int columnas){
 }
 
 // 3.10
-int procesarCascadas(unsigned char* datos, int filas, int columnas, int& combinacionesTotales){
+int procesarCascadas(unsigned char* datos, int filas, int columnas, int& combinacionesDetectadas, int& fichasEliminadas){
     int cascadas = 0;
-    combinacionesTotales = 0;
+    fichasEliminadas = 0;
     int combosDetectados = 0;
+    int eliminadas;
 
-    int eliminadas = resolverCombinaciones(datos, filas, columnas, combosDetectados);
-    combinacionesTotales += combosDetectados;
-
-    while(eliminadas != 0){ // repite mientras haya combinaciones nuevas
+    // ---- CAMBIO EMPIEZA AQUI ----
+    do {
         reorganizarTablero(datos, filas, columnas);
-        cascadas++;
         eliminadas = resolverCombinaciones(datos, filas, columnas, combosDetectados);
-        combinacionesTotales +=combosDetectados;
-    }
+        combinacionesDetectadas += combosDetectados;
+        fichasEliminadas += eliminadas;
+        if (eliminadas > 0) cascadas++;
+    } while (eliminadas != 0);
+    // ---- CAMBIO TERMINA AQUI ----
 
     return cascadas;
 }

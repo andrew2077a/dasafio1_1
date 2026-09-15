@@ -1,6 +1,7 @@
 #include "tablero.h"
 #include "bits.h"
 #include <iostream>
+#include <iomanip> // Necesario para std::setw
 using namespace std;
 
 // 2.1
@@ -50,14 +51,28 @@ double calcularPorcentajeUso(int filas, int columnas, int bytesReservadosActuale
     int BytesNecesarios = calcularBytesNecesarios(filas * columnas);
     return (BytesNecesarios * 100.0) / bytesReservadosActuales; // % de lo reservado que de verdad se usa
 }
-
 // 2.5
+
 void mostrarTablero(unsigned char* datos, int filas, int columnas){
     unsigned char ficha;
+
+    // 1. Espacio inicial para alinear con los números de fila
+    cout << "     ";
+
+    // 2. Encabezado de columnas: cada columna ocupa exactamente 4 espacios de ancho
+    for(int e = 0; e < columnas; e++){
+        cout << " " << setw(2) << e << " "; // Ejemplo: "  0 ", " 10 "
+    }
+    cout << endl;
+
     for(int i = 0; i < filas; i++){
+        // 3. Número de fila formateado a 3 espacios (ej: "  0 ", " 10 ")
+        cout << setw(3) << i << "  ";
+
         for(int j = 0; j < columnas; j++){
-            cout << "|";
             ficha = obtenerFicha(datos, calcularIndice(i, j, columnas));
+
+            cout << " |";
             switch (ficha) { // cada valor de ficha -> un carácter decorativo
             case 0b00000001: cout << (char)254; break; // 1
             case 0b00000010: cout << (char)205; break; // 2
@@ -65,13 +80,13 @@ void mostrarTablero(unsigned char* datos, int filas, int columnas){
             case 0b00000100: cout << (char)36;  break; // 4
             case 0b00000101: cout << (char)35;  break; // 5
             case 0b00000110: cout << (char)206; break; // 6
+            default:         cout << "?";       break; // Casilla vacía
             }
             cout << "|";
         }
         cout << endl;
     }
 }
-
 // 2.5b (visualización en binario, requisito explícito del enunciado)
 void mostrarTableroBinario(unsigned char* datos, int filas, int columnas){
     for(int i = 0; i < filas; i++){
