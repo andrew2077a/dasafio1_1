@@ -1,7 +1,7 @@
 #ifndef TABLERO_H
 #define TABLERO_H
 
-void crearTablero(unsigned char*& datos, int& filas, int& columnas, int filasIniciales, int columnasIniciales);
+void crearTablero(unsigned char*& datos, int filas, int columnas);
 void destruirTablero(unsigned char*& datos);
 void redimensionarTablero(unsigned char*& datos, int filasViejas, int columnasViejas, int filasNuevas, int columnasNuevas);
 double calcularPorcentajeUso(int filas, int columnas, int bytesReservadosActuales);

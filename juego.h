@@ -12,5 +12,8 @@ void generarFichasIniciales(unsigned char* datos, int filas, int columnas);
 int resolverCombinaciones(unsigned char* datos, int filas, int columnas, int& combosDetectados);
 void reorganizarTablero(unsigned char* datos, int filas, int columnas);
 int procesarCascadas(unsigned char* datos, int filas, int columnas, int& combinacionesTotales);
+void ImprimirMenu();
+void ImprimirLogo();
+void ImprimirFinal();
 
 #endif

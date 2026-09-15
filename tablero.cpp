@@ -4,9 +4,7 @@
 using namespace std;
 
 // 2.1
-void crearTablero(unsigned char*& datos, int& filas, int& columnas, int filasIniciales, int columnasIniciales){
-    filas = filasIniciales;
-    columnas = columnasIniciales;
+void crearTablero(unsigned char*& datos, int filas, int columnas){
     int posiciones = filas * columnas;
     int totalBytes = calcularBytesNecesarios(posiciones);
     datos = new unsigned char[totalBytes]; // reserva memoria exacta, sin sobras

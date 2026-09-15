@@ -127,15 +127,8 @@ void generarFichasIniciales(unsigned char* datos, int filas, int columnas){
 
 // 3.8
 int resolverCombinaciones(unsigned char* datos, int filas, int columnas, int& combosDetectados){
-    static unsigned char* marcas = nullptr;
-    static int capacidadActual = 0;
     int posiciones = filas * columnas;
-
-    if (posiciones > capacidadActual) {          // solo reserva si el tablero creció
-        delete[] marcas;
-        marcas = new unsigned char[posiciones];
-        capacidadActual = posiciones;
-    }
+    unsigned char* marcas = new unsigned char[posiciones]; // CAMBIO: se quitó capacidadActual y el if, ya no tenían proposito sin static
     for (int i = 0; i < posiciones; i++) marcas[i] = 0; // igual hay que limpiarlo cada vez
 
     int fichasBorradas = 0;
@@ -152,6 +145,7 @@ int resolverCombinaciones(unsigned char* datos, int filas, int columnas, int& co
             }
         }
     }
+    delete[] marcas; // se libera aquí mismo, ya no hay fuga
     return fichasBorradas;
 }
 
@@ -195,4 +189,37 @@ int procesarCascadas(unsigned char* datos, int filas, int columnas, int& combina
     }
 
     return cascadas;
+}
+void ImprimirMenu(){
+    cout << "\n========================================" << endl;
+    cout << "           OPCIONES DE JUEGO            " << endl;
+    cout << "========================================" << endl;
+    cout << "1. Eliminar ficha" << endl;
+    cout << "2. Agregar fila" << endl;
+    cout << "3. Eliminar fila" << endl;
+    cout << "4. Agregar columna" << endl;
+    cout << "5. Eliminar columna" << endl;
+    cout << "6. Salir" << endl;
+    cout << "========================================" << endl;
+    cout << "Seleccione una opcion: ";
+}
+void ImprimirLogo(){
+    cout << "   *  .  o  O  o  .  *      C A N D Y   C R U S H      *  .  o  O  o  .  *" << endl;
+    cout << "==============================================================================" << endl;
+    cout << "  ____    _    _   _  ____ __   __   ____ ____  _   _ ____  _   _ " << endl;
+    cout << " / ___|  / \\  | \\ | ||  _ \\\\ \\ / /  / ___|  _ \\| | | / ___|| | | |" << endl;
+    cout << "| |     / _ \\ |  \\| || | | |\\ V /  | |   | |_) | | | \\___ \\| |_| |" << endl;
+    cout << "| |___ / ___ \\| |\\  || |_| | | |   | |___|  _ <| |_| |___) |  _  |" << endl;
+    cout << " \\____/_/   \\_\\_| \\_||____/  |_|    \\____|_| \\_\\\\___/|____/|_| |_|" << endl;
+    cout << "==============================================================================" << endl;
+    cout << "   *  .  o  O  o  .  *                                  *  .  o  O  o  .  *" << endl<<endl;
+}
+void ImprimirFinal(){
+    cout << "==============================================================================" << endl;
+    cout << "            ____    _    __  __ _____     _____     _______ ____  " << endl;
+    cout << "           / ___|  / \\  |  \\/  | ____|   / _ \\ \\   / / ____|  _ \\ " << endl;
+    cout << "          | |  _  / _ \\ | |\\/| |  _|    | | | \\ \\ / /|  _| | |_) |" << endl;
+    cout << "          | |_| |/ ___ \\| |  | | |___   | |_| |\\ V / | |___|  _ < " << endl;
+    cout << "           \\____/_/   \\_\\_|  |_|_____|   \\___/  \\_/  |_____|_| \\_\\" << endl;
+    cout << "==============================================================================" << endl;
 }
