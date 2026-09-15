@@ -4,9 +4,7 @@
 using namespace std;
 
 // 2.1
-void crearTablero(unsigned char*& datos, int& filas, int& columnas, int filasIniciales, int columnasIniciales){
-    filas = filasIniciales;
-    columnas = columnasIniciales;
+void crearTablero(unsigned char*& datos, int filas, int columnas){
     int posiciones = filas * columnas;
     int totalBytes = calcularBytesNecesarios(posiciones);
     datos = new unsigned char[totalBytes]; // reserva memoria exacta, sin sobras
@@ -65,19 +63,19 @@ void mostrarTablero(unsigned char* datos, int filas, int columnas){
             cout << "|";
             ficha = obtenerFicha(datos, calcularIndice(i, j, columnas));
             switch (ficha) { // cada valor de ficha -> un carácter decorativo
-            case 0b00000001: cout << (char)254; break;
-            case 0b00000011: cout << (char)205; break;
-            case 0b00000111: cout << (char)206; break;
-            case 0b00000101: cout << (char)36;  break;
-            case 0b00000110: cout << (char)35;  break;
-            case 0b00000100: cout << (char)64;  break;
-            default: break;
+            case 0b00000001: cout << (char)254; break; // 1
+            case 0b00000010: cout << (char)205; break; // 2
+            case 0b00000011: cout << (char)64;  break; // 3
+            case 0b00000100: cout << (char)36;  break; // 4
+            case 0b00000101: cout << (char)35;  break; // 5
+            case 0b00000110: cout << (char)206; break; // 6
             }
             cout << "|";
         }
         cout << endl;
     }
 }
+
 
 // 2.5b (visualización en binario, requisito explícito del enunciado)
 void mostrarTableroBinario(unsigned char* datos, int filas, int columnas){
@@ -101,41 +99,42 @@ void mostrarTableroBinario(unsigned char* datos, int filas, int columnas){
 //*********************************************************************************************************************************************//
 
 //2.6
-void agregarFila(unsigned char*& datos, int& filas, int columnas, int posicion , int& bytesReservadosActuales){
+
+void agregarFila(unsigned char*& datos, int& filas, int columnas, int posicion, int& bytesReservadosActuales){
     int filasViejas = filas;
     int filasNuevas = filas + 1;
     int bytesNecesarios = calcularBytesNecesarios(filasNuevas * columnas);
 
-    if (bytesNecesarios > bytesReservadosActuales) {    // solo se agranda si ya no cabe
+    if (bytesNecesarios > bytesReservadosActuales) { // solo se agranda si ya no cabe
         redimensionarTablero(datos, filasViejas, columnas, filasNuevas, columnas);
         bytesReservadosActuales = bytesNecesarios;
     }
 
     filas = filasNuevas;
-    if (posicion < filasViejas){ // hay que abrir espacio en medio
 
-    }
-    if (posicion<filasViejas){
-        int f = filasViejas -  1;
+    if (posicion < filasViejas){ // hay que abrir espacio en medio
+        int f = filasViejas - 1;
         while (f >= posicion) { // de atrás hacia adelante para no pisar datos sin leer
-        int c = 0 ;
-        while ( c < columnas){
-          int indiceOrigen = calcularIndice(f, c, columnas);
-          unsigned char ficha = obtenerFicha(datos, indiceOrigen);
-          int indiceDestino = calcularIndice(f + 1, c, columnas);
-          establecerFicha(datos, indiceDestino, ficha); // corre la fila una posición abajo
-          c++;
-          }
-         f--;
-          }
-     }
-   int c = 0;
+            int c = 0;
+            while (c < columnas){
+                int indiceOrigen = calcularIndice(f, c, columnas);
+                unsigned char ficha = obtenerFicha(datos, indiceOrigen);
+                int indiceDestino = calcularIndice(f + 1, c, columnas);
+                establecerFicha(datos, indiceDestino, ficha); // corre la fila una posición abajo
+                c++;
+            }
+            f--;
+        }
+    }
+
+    int c = 0;
     while (c < columnas) {
         int indice = calcularIndice(posicion, c, columnas);
-        establecerFicha(datos, indice, 0 ); // llena la fila nueva con ficha por defecto
+        establecerFicha(datos, indice, 0); // llena la fila nueva con ficha por defecto
         c++;
     }
- }
+}
+
 
 //*********************************************************************************************************************************************//
 
@@ -192,34 +191,32 @@ void agregarFila(unsigned char*& datos, int& filas, int columnas, int posicion ,
 //*********************************************************************************************************************************************//
 
  //2.9
-void eliminarColumna(unsigned char*& datos, int filas, int& columnas, int posicion,int& bytesReservadosActuales){
-    int columnasViejas = columnas;
-    int columnasNuevas = columnas - 1;
-    int f = 0;
-    while(f < filas){
-        int c = 0;
-        while(c < columnasViejas){
-            if (c == posicion) {  // se salta la columna que se elimina
-                c++;
-                continue;
-             }
+ void eliminarColumna(unsigned char*& datos, int filas, int& columnas, int posicion, int& bytesReservadosActuales){
+     int columnasViejas = columnas;
+     int columnasNuevas = columnas - 1;
+
+     int f = 0;
+     while(f < filas){
+         int c = 0;
+         while(c < columnasViejas){
+             if (c == posicion) { c++; continue; } // se salta la columna que se elimina
 
              int columnaNueva = (c < posicion) ? c : c - 1;
+
              int indiceViejo = calcularIndice(f, c, columnasViejas);
              unsigned char ficha = obtenerFicha(datos, indiceViejo);
 
              int indiceNuevo = calcularIndice(f, columnaNueva, columnasNuevas);
              establecerFicha(datos, indiceNuevo, ficha); // compacta dentro del mismo arreglo
              c++;
-        }
+         }
          f++;
+     }
 
-    }
      columnas = columnasNuevas;
-     double porcentajeUso = calcularPorcentajeUso(filas,columnas, bytesReservadosActuales);
-     if (porcentajeUso< 65 ){ // solo se libera memoria física si ya sobra mucho
+     double porcentajeUso = calcularPorcentajeUso(filas, columnas, bytesReservadosActuales);
+     if (porcentajeUso < 65){ // solo se libera memoria física si ya sobra mucho
          redimensionarTablero(datos, filas, columnas, filas, columnas);
          bytesReservadosActuales = calcularBytesNecesarios(filas * columnas);
      }
-
-}
+ }
