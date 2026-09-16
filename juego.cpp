@@ -29,11 +29,11 @@ int detectarCombinacionesHorizontales(unsigned char* datos, int filas, int colum
         unsigned char comparar = obtenerFicha(datos, calcularIndice(i, 0, columnas));
         for (int j = 1; j < columnas; j++){
             unsigned char ficha = obtenerFicha(datos, calcularIndice(i, j, columnas));
-            if (ficha == comparar && ficha != 0){ // CORRECCION: != 0, "vacio" nunca cuenta como combo
+            if (ficha == comparar && ficha != 0){ // != 0, "vacio" nunca cuenta como combo
                 cont++;
             }
             else {
-                if (cont >= 3 && comparar != 0){ // CORRECCION: comparar != 0
+                if (cont >= 3 && comparar != 0){ // comparar != 0
                     for (int e = 0; e < cont; e++){
                         marcas[calcularIndice(i, j-1-e, columnas)] = 1;
                     }
@@ -43,7 +43,7 @@ int detectarCombinacionesHorizontales(unsigned char* datos, int filas, int colum
             }
             comparar = ficha;
         }
-        if (cont >= 3 && comparar != 0){ // CORRECCION: comparar != 0
+        if (cont >= 3 && comparar != 0){ // revisa la racha que termina justo al final de la fila
             for (int e = 0; e < cont; e++){
                 marcas[calcularIndice(i, columnas-1-e, columnas)] = 1;
             }
@@ -127,18 +127,17 @@ void generarFichasIniciales(unsigned char* datos, int filas, int columnas){
 
 // 3.8
 int resolverCombinaciones(unsigned char* datos, int filas, int columnas, int& combosDetectados){
-    // ---- CAMBIO EMPIEZA AQUI ----
+    // marcas: reservada una sola vez (static) y reutilizada, en vez de new/delete en cada llamada
     static unsigned char* marcas = nullptr;
     static int capacidadActual = 0;
     int posiciones = filas * columnas;
 
-    if (posiciones > capacidadActual) {
+    if (posiciones > capacidadActual) { // solo reserva si el tablero creció
         delete[] marcas;
         marcas = new unsigned char[posiciones];
         capacidadActual = posiciones;
     }
-    // ---- CAMBIO TERMINA AQUI ----
-    for (int i = 0; i < posiciones; i++) marcas[i] = 0;
+    for (int i = 0; i < posiciones; i++) marcas[i] = 0; // igual hay que limpiarlo cada vez
 
     int fichasBorradas = 0;
     int combosH = detectarCombinacionesHorizontales(datos, filas, columnas, marcas);
@@ -149,7 +148,7 @@ int resolverCombinaciones(unsigned char* datos, int filas, int columnas, int& co
         for (int c = 0; c < columnas; c++) {
             int indice = calcularIndice(f, c, columnas);
             if (marcas[indice] == 1) {
-                establecerFicha(datos, indice, 0);
+                establecerFicha(datos, indice, 0); // vacía las marcadas
                 fichasBorradas++;
             }
         }
@@ -182,19 +181,18 @@ void reorganizarTablero(unsigned char* datos, int filas, int columnas){
 // 3.10
 int procesarCascadas(unsigned char* datos, int filas, int columnas, int& combinacionesDetectadas, int& fichasEliminadas){
     int cascadas = 0;
-    fichasEliminadas = 0;
+    fichasEliminadas = 0; // esto sí se resetea: es solo de esta jugada
     int combosDetectados = 0;
     int eliminadas;
 
-    // ---- CAMBIO EMPIEZA AQUI ----
+    // do-while: reorganiza SIEMPRE al menos una vez (llena el hueco aunque no haya combo)
     do {
         reorganizarTablero(datos, filas, columnas);
         eliminadas = resolverCombinaciones(datos, filas, columnas, combosDetectados);
-        combinacionesDetectadas += combosDetectados;
+        combinacionesDetectadas += combosDetectados; // se suma, nunca se resetea acá
         fichasEliminadas += eliminadas;
         if (eliminadas > 0) cascadas++;
     } while (eliminadas != 0);
-    // ---- CAMBIO TERMINA AQUI ----
 
     return cascadas;
 }

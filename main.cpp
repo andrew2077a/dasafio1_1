@@ -26,7 +26,7 @@ int main() {
     while(true){
         cout << "Columnas: ";
         cin >> columnas;
-        if (columnas<=0){
+        if (columnas<=0||columnas>36){ // limite maximo de columnas
             cout<<"Numero invalido: ingrese otro"<<endl;
         }
         else{
@@ -38,19 +38,20 @@ int main() {
     crearTablero(datos, filas, columnas);
     bytesReservados = calcularBytesNecesarios(filas * columnas);
     generarFichasIniciales(datos, filas, columnas);
-    procesarCascadas(datos, filas, columnas, combinacionesDetectadas, fichasEstaJugada);
+    procesarCascadas(datos, filas, columnas, combinacionesDetectadas, fichasEstaJugada); // resuelve combos que salieron ya armados al azar
 
 
     bool jugando = true;
     while (jugando) {
+        cout<<endl<<"TABLERO BINARIO"<<endl;
+        mostrarTableroBinario(datos,filas,columnas);
+        cout<<endl<<"TABLERO JUEGO"<<endl;
         mostrarTablero(datos, filas, columnas);
         ImprimirMenu();
         cin >> opcion;
 
-        // ---- CAMBIO EMPIEZA AQUI ----
-        fichasEstaJugada = 0;
-        bool huboAccion = false;
-        // ---- CAMBIO TERMINA AQUI ----
+        fichasEstaJugada = 0; // se resetea en cada jugada
+        bool huboAccion = false; // indica si de verdad se modifico el tablero esta vuelta
 
         switch (opcion) {
         case 1: // Eliminar ficha
@@ -60,19 +61,16 @@ int main() {
             cin >> columna;
             if (eliminarFichaUsuario(datos, filas, columnas, fila, columna)) {
                 eliminacionesUsuario++;
-                // ---- CAMBIO EMPIEZA AQUI ----
                 huboAccion = true;
-                // ---- CAMBIO TERMINA AQUI ----
             } else {
                 cout << "Movimiento invalido (fuera de rango o casilla vacia)." << endl;
             }
             break;
 
-        // ---- CAMBIO EMPIEZA AQUI (case 2 completo) ----
         case 2: // Agregar fila
             cout << "Ingrese la posicion en donde deberia estar (0 a " << filas << "): ";
             cin >> posicion;
-            if (posicion < 0 || posicion > filas) {
+            if (posicion < 0 || posicion > filas) { // valida rango antes de tocar el tablero
                 cout << "Posicion invalida." << endl;
             } else {
                 agregarFila(datos, filas, columnas, posicion, bytesReservados);
@@ -81,7 +79,7 @@ int main() {
             break;
 
         case 3: // Eliminar fila
-            if (filas <= 1) {
+            if (filas <= 1) { // no dejar el tablero sin filas
                 cout << "No se puede eliminar: el tablero se quedaria sin filas." << endl;
                 break;
             }
@@ -107,7 +105,7 @@ int main() {
             break;
 
         case 5: // Eliminar columna
-            if (columnas <= 1) {
+            if (columnas <= 1) { // no dejar el tablero sin columnas
                 cout << "No se puede eliminar: el tablero se quedaria sin columnas." << endl;
                 break;
             }
@@ -120,7 +118,6 @@ int main() {
                 huboAccion = true;
             }
             break;
-            // ---- CAMBIO TERMINA AQUI (case 2 a 5 completos) ----
 
         case 6: // Salir
             jugando = false;
@@ -131,15 +128,14 @@ int main() {
             break;
         }
 
-        // ---- CAMBIO EMPIEZA AQUI ----
+        // solo se procesan cascadas si de verdad hubo una accion que cambio el tablero
         if (jugando && huboAccion) {
             cascadasActuales = procesarCascadas(datos, filas, columnas, combinacionesDetectadas, fichasEstaJugada);
             fichasEliminadasTotal += fichasEstaJugada;
-            puntuacionTotal += calcularPuntuacion(fichasEstaJugada, cascadasActuales);
+            puntuacionTotal += calcularPuntuacion(fichasEstaJugada, cascadasActuales); // se usa solo lo de esta jugada
         } else if (jugando) {
-            cascadasActuales = 0;
+            cascadasActuales = 0; // no hubo accion real, no hay cascada que mostrar
         }
-        // ---- CAMBIO TERMINA AQUI ----
 
         if (jugando) {
             mostrarEstadoJuego(filas, columnas, eliminacionesUsuario,

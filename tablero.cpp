@@ -80,7 +80,7 @@ void mostrarTablero(unsigned char* datos, int filas, int columnas){
             case 0b00000100: cout << (char)36;  break; // 4
             case 0b00000101: cout << (char)35;  break; // 5
             case 0b00000110: cout << (char)206; break; // 6
-            default:         cout << "?";       break; // Casilla vacía
+            default:         cout << "?";       break; // casilla vacía (0) o valor no usado
             }
             cout << "|";
         }
@@ -99,9 +99,9 @@ void mostrarTableroBinario(unsigned char* datos, int filas, int columnas){
                 }
                 else{
                     cout<<"0";
-                } // cierra el else
-                } // cierra el for(bit)
-        } // cierra el for(j)
+                }
+            }
+        }
         cout << "|" << endl; // salto de línea al terminar la fila
     }
 }
