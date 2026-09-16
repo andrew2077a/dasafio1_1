@@ -5,19 +5,19 @@
 #include <iostream>
 #include <ctime>
 using namespace std;
-
 int main() {
     ImprimirLogo();
     srand(time(0));
 
     int filas, columnas, opcion, fila, columna, posicion, bytesReservados;
-    int eliminacionesUsuario = 0, fichasEliminadasTotal = 0, combinacionesTotales = 0, cascadasActuales = 0, puntuacion = 0;
+    int eliminacionesUsuario = 0, fichasEliminadasTotal = 0, combinacionesDetectadas = 0, cascadasActuales = 0, puntuacionTotal = 0;
+
     cout << "Ingrese las filas y columnas del tablero para iniciar el juego" << endl;
     while(true){
         cout << "Filas: ";
         cin >> filas;
         if (filas<=0){
-            cout<<"Numero invalido: ingrese otro";
+            cout<<"Numero invalido: ingrese otro"<<endl;
         }
         else{
             break;
@@ -26,68 +26,101 @@ int main() {
     while(true){
         cout << "Columnas: ";
         cin >> columnas;
-        if (columnas<=0){
-            cout<<"Numero invalido: ingrese otro";
+        if (columnas<=0||columnas>36){ // limite maximo de columnas
+            cout<<"Numero invalido: ingrese otro"<<endl;
         }
         else{
             break;
         }
     }
-    unsigned char* datos = nullptr; // CORRECCION: datos debe ser puntero, no unsigned char suelto
+    int fichasEstaJugada = 0;
+    unsigned char* datos = nullptr;
     crearTablero(datos, filas, columnas);
-    bytesReservados = calcularBytesNecesarios(filas * columnas); // CORRECCION: se inicializa aqui, antes no existia el valor inicial
+    bytesReservados = calcularBytesNecesarios(filas * columnas);
     generarFichasIniciales(datos, filas, columnas);
+    procesarCascadas(datos, filas, columnas, combinacionesDetectadas, fichasEstaJugada); // resuelve combos que salieron ya armados al azar
 
-    bool jugando = true; // CORRECCION: bandera para poder salir del while(true) con la opcion 6
+
+    bool jugando = true;
     while (jugando) {
+        cout<<endl<<"TABLERO BINARIO"<<endl;
+        mostrarTableroBinario(datos,filas,columnas);
+        cout<<endl<<"TABLERO JUEGO"<<endl;
         mostrarTablero(datos, filas, columnas);
         ImprimirMenu();
         cin >> opcion;
 
+        fichasEstaJugada = 0; // se resetea en cada jugada
+        bool huboAccion = false; // indica si de verdad se modifico el tablero esta vuelta
+
         switch (opcion) {
         case 1: // Eliminar ficha
-            cout << "Ingrese la fila" << endl;
+            cout << "Ingrese la fila: ";
             cin >> fila;
-            cout << "Ingrese la columna" << endl;
+            cout << "Ingrese la columna: ";
             cin >> columna;
-
-            if (eliminarFichaUsuario(datos, filas, columnas, fila, columna)) { // CORRECCION: se revisa el resultado antes de seguir
-                eliminacionesUsuario++; // CORRECCION: ahora si se cuenta
-                cascadasActuales = procesarCascadas(datos, filas, columnas, combinacionesTotales); // CORRECCION: ya no se llama resolverCombinaciones aparte, procesarCascadas lo hace internamente
+            if (eliminarFichaUsuario(datos, filas, columnas, fila, columna)) {
+                eliminacionesUsuario++;
+                huboAccion = true;
             } else {
                 cout << "Movimiento invalido (fuera de rango o casilla vacia)." << endl;
-                cascadasActuales = 0;
-                combinacionesTotales = 0;
             }
-            puntuacion = calcularPuntuacion(fichasEliminadasTotal, cascadasActuales); // fichasEliminadasTotal se mantiene en 0 por ahora, procesarCascadas no expone ese dato
             break;
 
         case 2: // Agregar fila
-            cout << "Ingrese la posicion en donde deberia estar" << endl;
+            cout << "Ingrese la posicion en donde deberia estar (0 a " << filas << "): ";
             cin >> posicion;
-            agregarFila(datos, filas, columnas, posicion, bytesReservados); // CORRECCION: era eliminarFila, la opcion 2 del menu es "Agregar fila"
+            if (posicion < 0 || posicion > filas) { // valida rango antes de tocar el tablero
+                cout << "Posicion invalida." << endl;
+            } else {
+                agregarFila(datos, filas, columnas, posicion, bytesReservados);
+                huboAccion = true;
+            }
             break;
 
         case 3: // Eliminar fila
-            cout << "Ingrese la posicion a eliminar" << endl;
+            if (filas <= 1) { // no dejar el tablero sin filas
+                cout << "No se puede eliminar: el tablero se quedaria sin filas." << endl;
+                break;
+            }
+            cout << "Ingrese la fila a eliminar (0 a " << filas-1 << "): ";
             cin >> posicion;
-            eliminarFila(datos, filas, columnas, posicion, bytesReservados);
+            if (posicion < 0 || posicion >= filas) {
+                cout << "Posicion invalida." << endl;
+            } else {
+                eliminarFila(datos, filas, columnas, posicion, bytesReservados);
+                huboAccion = true;
+            }
             break;
 
         case 4: // Agregar columna
-            cout << "Ingrese la posicion en donde deberia estar" << endl;
+            cout << "Ingrese la posicion en donde deberia estar (0 a " << columnas << "): ";
             cin >> posicion;
-            agregarColumna(datos, filas, columnas, posicion, bytesReservados);
+            if (posicion < 0 || posicion > columnas) {
+                cout << "Posicion invalida." << endl;
+            } else {
+                agregarColumna(datos, filas, columnas, posicion, bytesReservados);
+                huboAccion = true;
+            }
             break;
 
         case 5: // Eliminar columna
-            cout << "Ingrese la posicion a eliminar" << endl;
+            if (columnas <= 1) { // no dejar el tablero sin columnas
+                cout << "No se puede eliminar: el tablero se quedaria sin columnas." << endl;
+                break;
+            }
+            cout << "Ingrese la columna a eliminar (0 a " << columnas-1 << "): ";
             cin >> posicion;
-            eliminarColumna(datos, filas, columnas, posicion, bytesReservados);
+            if (posicion < 0 || posicion >= columnas) {
+                cout << "Posicion invalida." << endl;
+            } else {
+                eliminarColumna(datos, filas, columnas, posicion, bytesReservados);
+                huboAccion = true;
+            }
             break;
 
         case 6: // Salir
-            jugando = false; // CORRECCION: ahora si se puede salir del bucle
+            jugando = false;
             break;
 
         default:
@@ -95,14 +128,23 @@ int main() {
             break;
         }
 
+        // solo se procesan cascadas si de verdad hubo una accion que cambio el tablero
+        if (jugando && huboAccion) {
+            cascadasActuales = procesarCascadas(datos, filas, columnas, combinacionesDetectadas, fichasEstaJugada);
+            fichasEliminadasTotal += fichasEstaJugada;
+            puntuacionTotal += calcularPuntuacion(fichasEstaJugada, cascadasActuales); // se usa solo lo de esta jugada
+        } else if (jugando) {
+            cascadasActuales = 0; // no hubo accion real, no hay cascada que mostrar
+        }
+
         if (jugando) {
             mostrarEstadoJuego(filas, columnas, eliminacionesUsuario,
-                               fichasEliminadasTotal, combinacionesTotales,
-                               cascadasActuales, puntuacion);
+                               fichasEliminadasTotal, combinacionesDetectadas,
+                               cascadasActuales, puntuacionTotal);
         }
     }
 
     ImprimirFinal();
-    destruirTablero(datos); // CORRECCION: se libera la memoria antes de terminar
+    destruirTablero(datos);
     return 0;
 }

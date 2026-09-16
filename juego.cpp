@@ -1,30 +1,27 @@
 #include "juego.h"
 #include "bits.h"
+#include "tablero.h"
 #include <cstdlib> // Contiene rand() y srand()
 #include <iostream>
 using namespace std;
 
-
-//3.1
+// 3.1
 unsigned char generarFichaAleatoria(){
     return 1+ rand()%6; // rango 1-6
 }
 
-//*********************************************************************************************************************************************//
-
 // 3.2
 bool eliminarFichaUsuario(unsigned char* datos, int filas, int columnas, int fila, int columna){
-    if (fila >= 0 && fila < filas && columna >= 0 && columna < columnas) {
+    if (fila >= 0 && fila < filas && columna >= 0 && columna < columnas) { // valida límites
         int posicion = calcularIndice(fila, columna, columnas);
-        establecerFicha(datos, posicion, 0);
+        if (obtenerFicha(datos, posicion) == 0) return false; // ya estaba vacia, no hay nada que eliminar
+        establecerFicha(datos, posicion, 0); // marca como vacío
         return true;
     }
     return false;
 }
 
-//*********************************************************************************************************************************************//
-
-//3.3
+// 3.3
 int detectarCombinacionesHorizontales(unsigned char* datos, int filas, int columnas, unsigned char* marcas){
     int cunt = 0;
     for (int i = 0; i < filas; i++){
@@ -32,11 +29,11 @@ int detectarCombinacionesHorizontales(unsigned char* datos, int filas, int colum
         unsigned char comparar = obtenerFicha(datos, calcularIndice(i, 0, columnas));
         for (int j = 1; j < columnas; j++){
             unsigned char ficha = obtenerFicha(datos, calcularIndice(i, j, columnas));
-            if (ficha == comparar && ficha != 0){ // CORRECCION: != 0, "vacio" nunca cuenta como combo
+            if (ficha == comparar && ficha != 0){ // != 0, "vacio" nunca cuenta como combo
                 cont++;
             }
             else {
-                if (cont >= 3 && comparar != 0){ // CORRECCION: comparar != 0
+                if (cont >= 3 && comparar != 0){ // comparar != 0
                     for (int e = 0; e < cont; e++){
                         marcas[calcularIndice(i, j-1-e, columnas)] = 1;
                     }
@@ -46,7 +43,7 @@ int detectarCombinacionesHorizontales(unsigned char* datos, int filas, int colum
             }
             comparar = ficha;
         }
-        if (cont >= 3 && comparar != 0){ // CORRECCION: comparar != 0
+        if (cont >= 3 && comparar != 0){ // revisa la racha que termina justo al final de la fila
             for (int e = 0; e < cont; e++){
                 marcas[calcularIndice(i, columnas-1-e, columnas)] = 1;
             }
@@ -56,13 +53,11 @@ int detectarCombinacionesHorizontales(unsigned char* datos, int filas, int colum
     return cunt;
 }
 
-//*********************************************************************************************************************************************//
-
 // 3.4
 int detectarCombinacionesVerticales(unsigned char* datos, int filas, int columnas, unsigned char* marcas){
     int combinacionesDetectadas = 0;
     int c = 0 ;
-  while (c < columnas){
+    while (c < columnas){
         int f = 0 ;
         while (f < filas - 2){
             int indice1 = calcularIndice(f, c, columnas);
@@ -71,7 +66,7 @@ int detectarCombinacionesVerticales(unsigned char* datos, int filas, int columna
             unsigned char ficha1 = obtenerFicha(datos, indice1);
             unsigned char ficha2 = obtenerFicha(datos, indice2);
             unsigned char ficha3 = obtenerFicha(datos, indice3);
-            if (ficha1 != 0 && ficha1 == ficha2 && ficha2 == ficha3) {  // 3 iguales seguidas
+            if (ficha1 != 0 && ficha1 == ficha2 && ficha2 == ficha3) { // 3 iguales seguidas
                 if (marcas[indice1] == 0) { // evita contar de nuevo una racha ya marcada
                     combinacionesDetectadas++;
                 }
@@ -80,43 +75,40 @@ int detectarCombinacionesVerticales(unsigned char* datos, int filas, int columna
                 marcas[indice3] = 1;
             }
             f++;
-         }
+        }
         c++;
-     }
-  return combinacionesDetectadas;
+    }
+    return combinacionesDetectadas;
 }
-//3.5
+
+// 3.5
 int calcularPuntuacion(int fichasEliminadas, int cascadas){
-    if (fichasEliminadas == 0){
+    if (fichasEliminadas == 0){ // sin puntos si no eliminó nada
         return 0;
     }
     int PuntosAcumulados = fichasEliminadas * 10;
     int PuntosFinales = PuntosAcumulados;
-    if ( cascadas > 0  ){
+    if ( cascadas > 0  ){ // multiplicador solo si hubo cascada
         PuntosFinales = PuntosAcumulados *(cascadas + 2);
     }
     return PuntosFinales;
 }
 
-//*********************************************************************************************************************************************//
-
 // 3.6
 void mostrarEstadoJuego(int filas, int columnas, int eliminacionesUsuario,
                         int fichasEliminadasTotal, int combinacionesDetectadas,
                         int cascadasActuales, int puntuacion){
-    cout << "----------------------------------------------" << endl;
+    cout << "+--------------------------------------------+" << endl;
     cout << "|              ESTADO DEL JUEGO               |" << endl;
-    cout << "----------------------------------------------" << endl;
-    cout << "|              Tamano del tablero:            |" << filas << " x " << columnas << endl;
-    cout << "|             Eliminaciones usuario:          |" << eliminacionesUsuario << endl;
-    cout << "|            Fichas eliminadas total:         |" << fichasEliminadasTotal << endl;
-    cout << "|           Combinaciones detectadas:         |" << combinacionesDetectadas << endl;
-    cout << "|              Cascadas actuales:             |" << cascadasActuales << endl;
-    cout << "|                  Puntuacion:                |" << puntuacion << endl;
-    cout << "-----------------------------------------------" << endl;
+    cout << "+--------------------------------------------+" << endl;
+    cout << "| Tamano del tablero      : " << filas << " x " << columnas << endl;
+    cout << "| Eliminaciones usuario   : " << eliminacionesUsuario << endl;
+    cout << "| Fichas eliminadas total : " << fichasEliminadasTotal << endl;
+    cout << "| Combinaciones detectadas: " << combinacionesDetectadas << endl;
+    cout << "| Cascadas actuales       : " << cascadasActuales << endl;
+    cout << "| Puntuacion              : " << puntuacion << endl;
+    cout << "+--------------------------------------------+" << endl;
 }
-
-//*********************************************************************************************************************************************//
 
 // 3.7
 void generarFichasIniciales(unsigned char* datos, int filas, int columnas){
@@ -124,25 +116,33 @@ void generarFichasIniciales(unsigned char* datos, int filas, int columnas){
     while ( f < filas  ){
         int c = 0 ;
         while (c < columnas){
-        int posicion = calcularIndice(f, c, columnas);
-        unsigned char FichaAleatoria = generarFichaAleatoria();
-        establecerFicha(datos, posicion, FichaAleatoria);
-        c++;
+            int posicion = calcularIndice(f, c, columnas);
+            unsigned char FichaAleatoria = generarFichaAleatoria();
+            establecerFicha(datos, posicion, FichaAleatoria);
+            c++;
+        }
+        f++;
     }
-   f++;
-   }
 }
 
-//3.8
+// 3.8
 int resolverCombinaciones(unsigned char* datos, int filas, int columnas, int& combosDetectados){
+    // marcas: reservada una sola vez (static) y reutilizada, en vez de new/delete en cada llamada
+    static unsigned char* marcas = nullptr;
+    static int capacidadActual = 0;
     int posiciones = filas * columnas;
-    unsigned char* marcas = new unsigned char[posiciones]; // CAMBIO: se quitó capacidadActual y el if, ya no tenían proposito sin static
+
+    if (posiciones > capacidadActual) { // solo reserva si el tablero creció
+        delete[] marcas;
+        marcas = new unsigned char[posiciones];
+        capacidadActual = posiciones;
+    }
     for (int i = 0; i < posiciones; i++) marcas[i] = 0; // igual hay que limpiarlo cada vez
 
     int fichasBorradas = 0;
     int combosH = detectarCombinacionesHorizontales(datos, filas, columnas, marcas);
     int combosV = detectarCombinacionesVerticales(datos, filas, columnas, marcas);
-    combosDetectados = combosH + combosV; // NUEVO: ya no se descarta
+    combosDetectados = combosH + combosV;
 
     for (int f = 0; f < filas; f++) {
         for (int c = 0; c < columnas; c++) {
@@ -153,12 +153,8 @@ int resolverCombinaciones(unsigned char* datos, int filas, int columnas, int& co
             }
         }
     }
-    delete[] marcas; // se libera aquí mismo, ya no hay fuga
     return fichasBorradas;
 }
-
-//*********************************************************************************************************************************************//
-
 // 3.9
 void reorganizarTablero(unsigned char* datos, int filas, int columnas){
     for(int j=0;j<columnas;j++){
@@ -183,20 +179,20 @@ void reorganizarTablero(unsigned char* datos, int filas, int columnas){
 }
 
 // 3.10
-int procesarCascadas(unsigned char* datos, int filas, int columnas, int& combinacionesTotales){
+int procesarCascadas(unsigned char* datos, int filas, int columnas, int& combinacionesDetectadas, int& fichasEliminadas){
     int cascadas = 0;
-    combinacionesTotales = 0;
+    fichasEliminadas = 0; // esto sí se resetea: es solo de esta jugada
     int combosDetectados = 0;
+    int eliminadas;
 
-    int eliminadas = resolverCombinaciones(datos, filas, columnas, combosDetectados);
-    combinacionesTotales += combosDetectados;
-
-    while(eliminadas != 0){ // repite mientras haya combinaciones nuevas
+    // do-while: reorganiza SIEMPRE al menos una vez (llena el hueco aunque no haya combo)
+    do {
         reorganizarTablero(datos, filas, columnas);
-        cascadas++;
         eliminadas = resolverCombinaciones(datos, filas, columnas, combosDetectados);
-        combinacionesTotales +=combosDetectados;
-    }
+        combinacionesDetectadas += combosDetectados; // se suma, nunca se resetea acá
+        fichasEliminadas += eliminadas;
+        if (eliminadas > 0) cascadas++;
+    } while (eliminadas != 0);
 
     return cascadas;
 }
@@ -233,8 +229,3 @@ void ImprimirFinal(){
     cout << "           \\____/_/   \\_\\_|  |_|_____|   \\___/  \\_/  |_____|_| \\_\\" << endl;
     cout << "==============================================================================" << endl;
 }
-
-
-
-
-

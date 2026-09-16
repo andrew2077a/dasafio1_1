@@ -1,6 +1,7 @@
 #include "tablero.h"
 #include "bits.h"
 #include <iostream>
+#include <iomanip> // Necesario para std::setw
 using namespace std;
 
 // 2.1
@@ -16,17 +17,15 @@ void destruirTablero(unsigned char*& datos){
     datos = nullptr; // evita puntero colgante
 }
 
-//*********************************************************************************************************************************************//
-
 // 2.3
 void redimensionarTablero(unsigned char*& datos, int filasViejas, int columnasViejas, int filasNuevas, int columnasNuevas){
-    int BytesNuevos = calcularBytesNecesarios( filasNuevas * columnasNuevas);
+    int BytesNuevos = calcularBytesNecesarios(filasNuevas * columnasNuevas);
     unsigned char* BloqueNuevo = new unsigned char[BytesNuevos];
     for (int i = 0; i < BytesNuevos; i++) {
         BloqueNuevo[i] = 0; // arranca en 0 para no dejar basura en bits sin usar
     }
 
-     // solo se copia lo que cabe en ambos tamaños (viejo y nuevo)
+    // solo se copia lo que cabe en ambos tamaños (viejo y nuevo)
     int LimiteFilas = (filasViejas < filasNuevas) ? filasViejas : filasNuevas;
     int LimiteColumnas = (columnasViejas < columnasNuevas) ? columnasViejas : columnasNuevas;
 
@@ -38,30 +37,42 @@ void redimensionarTablero(unsigned char*& datos, int filasViejas, int columnasVi
             unsigned char ficha = obtenerFicha(datos, indiceViejo);
             int indiceNuevo = calcularIndice(f, c, columnasNuevas);
             establecerFicha(BloqueNuevo, indiceNuevo, ficha); // recoloca cada ficha en su nuevo índice
-
             c++;
         }
-         f++;
+        f++;
     }
+
     delete[] datos;
     datos = BloqueNuevo; // el tablero ya apunta al arreglo nuevo
 }
 
 // 2.4
 double calcularPorcentajeUso(int filas, int columnas, int bytesReservadosActuales){
-    int BytesNecesarios = calcularBytesNecesarios( filas * columnas);
+    int BytesNecesarios = calcularBytesNecesarios(filas * columnas);
     return (BytesNecesarios * 100.0) / bytesReservadosActuales; // % de lo reservado que de verdad se usa
 }
-
-//*********************************************************************************************************************************************//
-
 // 2.5
+
 void mostrarTablero(unsigned char* datos, int filas, int columnas){
     unsigned char ficha;
+
+    // 1. Espacio inicial para alinear con los números de fila
+    cout << "     ";
+
+    // 2. Encabezado de columnas: cada columna ocupa exactamente 4 espacios de ancho
+    for(int e = 0; e < columnas; e++){
+        cout << " " << setw(2) << e << " "; // Ejemplo: "  0 ", " 10 "
+    }
+    cout << endl;
+
     for(int i = 0; i < filas; i++){
+        // 3. Número de fila formateado a 3 espacios (ej: "  0 ", " 10 ")
+        cout << setw(3) << i << "  ";
+
         for(int j = 0; j < columnas; j++){
-            cout << "|";
             ficha = obtenerFicha(datos, calcularIndice(i, j, columnas));
+
+            cout << " |";
             switch (ficha) { // cada valor de ficha -> un carácter decorativo
             case 0b00000001: cout << (char)254; break; // 1
             case 0b00000010: cout << (char)205; break; // 2
@@ -69,14 +80,13 @@ void mostrarTablero(unsigned char* datos, int filas, int columnas){
             case 0b00000100: cout << (char)36;  break; // 4
             case 0b00000101: cout << (char)35;  break; // 5
             case 0b00000110: cout << (char)206; break; // 6
+            default:         cout << "?";       break; // casilla vacía (0) o valor no usado
             }
             cout << "|";
         }
         cout << endl;
     }
 }
-
-
 // 2.5b (visualización en binario, requisito explícito del enunciado)
 void mostrarTableroBinario(unsigned char* datos, int filas, int columnas){
     for(int i = 0; i < filas; i++){
@@ -89,17 +99,14 @@ void mostrarTableroBinario(unsigned char* datos, int filas, int columnas){
                 }
                 else{
                     cout<<"0";
-                } // cierra el else
-                } // cierra el for(bit)
-        } // cierra el for(j)
+                }
+            }
+        }
         cout << "|" << endl; // salto de línea al terminar la fila
     }
 }
 
-//*********************************************************************************************************************************************//
-
-//2.6
-
+// 2.6
 void agregarFila(unsigned char*& datos, int& filas, int columnas, int posicion, int& bytesReservadosActuales){
     int filasViejas = filas;
     int filasNuevas = filas + 1;
@@ -135,88 +142,83 @@ void agregarFila(unsigned char*& datos, int& filas, int columnas, int posicion, 
     }
 }
 
+// 2.7
+void eliminarFila(unsigned char*& datos, int& filas, int columnas, int posicion, int& bytesReservados){
 
-//*********************************************************************************************************************************************//
+    for(int fila = posicion; fila < filas - 1; fila++){ // corre las filas siguientes una posición arriba
+        for(int columna = 0; columna < columnas; columna++){
+            int indiceOrigen = calcularIndice(fila + 1, columna, columnas);
+            unsigned char valor = obtenerFicha(datos, indiceOrigen);
+            int indiceDestino = calcularIndice(fila, columna, columnas);
+            establecerFicha(datos, indiceDestino, valor);
+        }
+    }
 
- // 2.7
- void eliminarFila(unsigned char*& datos, int& filas, int columnas, int posicion, int& bytesReservados){
+    int filasViejas = filas;
+    filas--;
 
-     for(int fila = posicion; fila < filas - 1; fila++){ // corre las filas siguientes una posición arriba
-         for(int columna = 0; columna < columnas; columna++){
-             int indiceOrigen = calcularIndice(fila + 1, columna, columnas);
-             unsigned char valor = obtenerFicha(datos, indiceOrigen);
-             int indiceDestino = calcularIndice(fila, columna, columnas);
-             establecerFicha(datos, indiceDestino, valor);
-         }
-     }
+    double porcentajeUso = calcularPorcentajeUso(filas, columnas, bytesReservados);
 
-     int filasViejas = filas;
-     filas--;
+    if(porcentajeUso < 65.0){ // solo se achica la memoria si ya sobra mucho espacio
+        redimensionarTablero(datos, filasViejas, columnas, filas, columnas);
+        bytesReservados = calcularBytesNecesarios(filas * columnas);
+    }
+}
 
-     double porcentajeUso = calcularPorcentajeUso(filas, columnas, bytesReservados);
+// 2.8
+void agregarColumna(unsigned char*& datos, int filas, int& columnas, int posicion, int& bytesReservados){
+    int columnasNuevas = columnas + 1;
+    int bytesNuevos = calcularBytesNecesarios(filas * columnasNuevas);
+    unsigned char* datosNuevo = new unsigned char[bytesNuevos]; // ancho nuevo obliga a reconstruir todo
 
-     if(porcentajeUso < 65.0){ // solo se achica la memoria si ya sobra mucho espacio
-         redimensionarTablero(datos, filasViejas, columnas, filas, columnas);
-         bytesReservados = calcularBytesNecesarios(filas * columnas);
-     }
- }
+    for(int i = 0; i < filas; i++){
+        for(int j = 0; j < columnas; j++){
+            int columnaNueva = (j < posicion) ? j : j + 1; // desplaza las columnas después de "posicion"
 
- // 2.8
- void agregarColumna(unsigned char*& datos, int filas, int& columnas, int posicion, int& bytesReservados){
-     int columnasNuevas = columnas + 1;
-     int bytesNuevos = calcularBytesNecesarios(filas * columnasNuevas);
-     unsigned char* datosNuevo = new unsigned char[bytesNuevos]; // ancho nuevo obliga a reconstruir todo
+            int indiceViejo = calcularIndice(i, j, columnas);
+            unsigned char valor = obtenerFicha(datos, indiceViejo);
 
-     for(int i = 0; i < filas; i++){
-         for(int j = 0; j < columnas; j++){
-             int columnaNueva = (j < posicion) ? j : j + 1; // desplaza las columnas después de "posicion"
+            int indiceNuevo = calcularIndice(i, columnaNueva, columnasNuevas);
+            establecerFicha(datosNuevo, indiceNuevo, valor);
+        }
 
-             int indiceViejo = calcularIndice(i, j, columnas);
-             unsigned char valor = obtenerFicha(datos, indiceViejo);
+        int indiceColumnaNueva = calcularIndice(i, posicion, columnasNuevas);
+        establecerFicha(datosNuevo, indiceColumnaNueva, 0); // columna nueva, vacía por ahora
+    }
 
-             int indiceNuevo = calcularIndice(i, columnaNueva, columnasNuevas);
-             establecerFicha(datosNuevo, indiceNuevo, valor);
-         }
+    delete[] datos;
+    datos = datosNuevo;
+    columnas = columnasNuevas;
+    bytesReservados = bytesNuevos;
+}
 
-         int indiceColumnaNueva = calcularIndice(i, posicion, columnasNuevas);
-         establecerFicha(datosNuevo, indiceColumnaNueva, 0); // columna nueva, vacía por ahora
-     }
+// 2.9
+void eliminarColumna(unsigned char*& datos, int filas, int& columnas, int posicion, int& bytesReservadosActuales){
+    int columnasViejas = columnas;
+    int columnasNuevas = columnas - 1;
 
-     delete[] datos;
-     datos = datosNuevo;
-     columnas = columnasNuevas;
-     bytesReservados = bytesNuevos;
- }
+    int f = 0;
+    while(f < filas){
+        int c = 0;
+        while(c < columnasViejas){
+            if (c == posicion) { c++; continue; } // se salta la columna que se elimina
 
-//*********************************************************************************************************************************************//
+            int columnaNueva = (c < posicion) ? c : c - 1;
 
- //2.9
- void eliminarColumna(unsigned char*& datos, int filas, int& columnas, int posicion, int& bytesReservadosActuales){
-     int columnasViejas = columnas;
-     int columnasNuevas = columnas - 1;
+            int indiceViejo = calcularIndice(f, c, columnasViejas);
+            unsigned char ficha = obtenerFicha(datos, indiceViejo);
 
-     int f = 0;
-     while(f < filas){
-         int c = 0;
-         while(c < columnasViejas){
-             if (c == posicion) { c++; continue; } // se salta la columna que se elimina
+            int indiceNuevo = calcularIndice(f, columnaNueva, columnasNuevas);
+            establecerFicha(datos, indiceNuevo, ficha); // compacta dentro del mismo arreglo
+            c++;
+        }
+        f++;
+    }
 
-             int columnaNueva = (c < posicion) ? c : c - 1;
-
-             int indiceViejo = calcularIndice(f, c, columnasViejas);
-             unsigned char ficha = obtenerFicha(datos, indiceViejo);
-
-             int indiceNuevo = calcularIndice(f, columnaNueva, columnasNuevas);
-             establecerFicha(datos, indiceNuevo, ficha); // compacta dentro del mismo arreglo
-             c++;
-         }
-         f++;
-     }
-
-     columnas = columnasNuevas;
-     double porcentajeUso = calcularPorcentajeUso(filas, columnas, bytesReservadosActuales);
-     if (porcentajeUso < 65){ // solo se libera memoria física si ya sobra mucho
-         redimensionarTablero(datos, filas, columnas, filas, columnas);
-         bytesReservadosActuales = calcularBytesNecesarios(filas * columnas);
-     }
- }
+    columnas = columnasNuevas;
+    double porcentajeUso = calcularPorcentajeUso(filas, columnas, bytesReservadosActuales);
+    if (porcentajeUso < 65){ // solo se libera memoria física si ya sobra mucho
+        redimensionarTablero(datos, filas, columnas, filas, columnas);
+        bytesReservadosActuales = calcularBytesNecesarios(filas * columnas);
+    }
+}
