@@ -87,7 +87,7 @@ void mostrarTablero(unsigned char* datos, int filas, int columnas){
         cout << endl;
     }
 }
-// 2.5b (visualización en binario, requisito explícito del enunciado)
+// 2.5b (visualización en binario)
 void mostrarTableroBinario(unsigned char* datos, int filas, int columnas){
     for(int i = 0; i < filas; i++){
         for(int j = 0; j < columnas; j++){
@@ -145,11 +145,11 @@ void agregarFila(unsigned char*& datos, int& filas, int columnas, int posicion, 
 // 2.7
 void eliminarFila(unsigned char*& datos, int& filas, int columnas, int posicion, int& bytesReservados){
 
-    for(int fila = posicion; fila < filas - 1; fila++){ // corre las filas siguientes una posición arriba
-        for(int columna = 0; columna < columnas; columna++){
-            int indiceOrigen = calcularIndice(fila + 1, columna, columnas);
+    for(int i = posicion; i < filas - 1; i++){ // corre las filas siguientes una posición arriba
+        for(int j = 0; j < columnas; j++){
+            int indiceOrigen = calcularIndice(i + 1, j, columnas);
             unsigned char valor = obtenerFicha(datos, indiceOrigen);
-            int indiceDestino = calcularIndice(fila, columna, columnas);
+            int indiceDestino = calcularIndice(i, j, columnas);
             establecerFicha(datos, indiceDestino, valor);
         }
     }
@@ -201,7 +201,8 @@ void eliminarColumna(unsigned char*& datos, int filas, int& columnas, int posici
     while(f < filas){
         int c = 0;
         while(c < columnasViejas){
-            if (c == posicion) { c++; continue; } // se salta la columna que se elimina
+            if (c == posicion) {
+                c++; continue; } // se salta la columna que se elimina
 
             int columnaNueva = (c < posicion) ? c : c - 1;
 

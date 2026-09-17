@@ -33,12 +33,13 @@ int main() {
             break;
         }
     }
-    int fichasEstaJugada = 0;
+    int fichasEliminadas = 0;
     unsigned char* datos = nullptr;
     crearTablero(datos, filas, columnas);
     bytesReservados = calcularBytesNecesarios(filas * columnas);
     generarFichasIniciales(datos, filas, columnas);
-    procesarCascadas(datos, filas, columnas, combinacionesDetectadas, fichasEstaJugada); // resuelve combos que salieron ya armados al azar
+    procesarCascadas(datos, filas, columnas, combinacionesDetectadas, fichasEliminadas); // resuelve combos que salieron ya armados al azar
+    combinacionesDetectadas=0;
 
 
     bool jugando = true;
@@ -50,7 +51,7 @@ int main() {
         ImprimirMenu();
         cin >> opcion;
 
-        fichasEstaJugada = 0; // se resetea en cada jugada
+        fichasEliminadas = 0; // se resetea en cada jugada
         bool huboAccion = false; // indica si de verdad se modifico el tablero esta vuelta
 
         switch (opcion) {
@@ -130,9 +131,9 @@ int main() {
 
         // solo se procesan cascadas si de verdad hubo una accion que cambio el tablero
         if (jugando && huboAccion) {
-            cascadasActuales = procesarCascadas(datos, filas, columnas, combinacionesDetectadas, fichasEstaJugada);
-            fichasEliminadasTotal += fichasEstaJugada;
-            puntuacionTotal += calcularPuntuacion(fichasEstaJugada, cascadasActuales); // se usa solo lo de esta jugada
+            cascadasActuales = procesarCascadas(datos, filas, columnas, combinacionesDetectadas, fichasEliminadas);
+            fichasEliminadasTotal += fichasEliminadas;
+            puntuacionTotal += calcularPuntuacion(fichasEliminadas, cascadasActuales); // se usa solo lo de esta jugada
         } else if (jugando) {
             cascadasActuales = 0; // no hubo accion real, no hay cascada que mostrar
         }
@@ -145,6 +146,7 @@ int main() {
     }
 
     ImprimirFinal();
+    liberarMarcas();
     destruirTablero(datos);
     return 0;
 }

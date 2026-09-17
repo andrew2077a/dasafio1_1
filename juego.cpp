@@ -5,6 +5,8 @@
 #include <iostream>
 using namespace std;
 
+static unsigned char* marcas = nullptr;
+static int capacidadActual = 0;
 // 3.1
 unsigned char generarFichaAleatoria(){
     return 1+ rand()%6; // rango 1-6
@@ -33,7 +35,7 @@ int detectarCombinacionesHorizontales(unsigned char* datos, int filas, int colum
                 cont++;
             }
             else {
-                if (cont >= 3 && comparar != 0){ // comparar != 0
+                if (cont >= 3 && comparar != 0){
                     for (int e = 0; e < cont; e++){
                         marcas[calcularIndice(i, j-1-e, columnas)] = 1;
                     }
@@ -124,12 +126,9 @@ void generarFichasIniciales(unsigned char* datos, int filas, int columnas){
         f++;
     }
 }
-
 // 3.8
 int resolverCombinaciones(unsigned char* datos, int filas, int columnas, int& combosDetectados){
-    // marcas: reservada una sola vez (static) y reutilizada, en vez de new/delete en cada llamada
-    static unsigned char* marcas = nullptr;
-    static int capacidadActual = 0;
+    // "marcas" y "capacidadActual" ya no se declaran aquí -- ahora viven arriba,
     int posiciones = filas * columnas;
 
     if (posiciones > capacidadActual) { // solo reserva si el tablero creció
@@ -154,6 +153,13 @@ int resolverCombinaciones(unsigned char* datos, int filas, int columnas, int& co
         }
     }
     return fichasBorradas;
+}
+
+// función nueva, para liberar "marcas" al terminar el programa
+void liberarMarcas(){
+    delete[] marcas;
+    marcas = nullptr;
+    capacidadActual = 0;
 }
 // 3.9
 void reorganizarTablero(unsigned char* datos, int filas, int columnas){
